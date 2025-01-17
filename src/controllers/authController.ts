@@ -1,65 +1,207 @@
-import { Request, Response } from "express";
-import bcrypt from "bcrypt";
-import { Customer } from "../models/Customer";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { TokenPayload, AuthResponse, AuthRequest } from "../types";
+import { BadRequestError, UnauthorizedError } from "../utils/errors";
+import User from "../models/User";
 
-const JWT_SECRET = "jwt-secret-key";
+const generateTokens = (
+	userId: string
+): { accessToken: string; refreshToken: string } => {
+	const accessToken = jwt.sign(
+		{ userId } as TokenPayload,
+		process.env.JWT_SECRET ?? "secret",
+		{ expiresIn: "15m" }
+	);
 
-export const login = async (req: Request, res: Response) => {
-	const { email, password } = req.body;
+	const refreshToken = jwt.sign(
+		{ userId } as TokenPayload,
+		process.env.JWT_REFRESH_SECRET ?? "refresh_secret",
+		{ expiresIn: "7d" }
+	);
 
+	return { accessToken, refreshToken };
+};
+
+interface RegisterRequestBody {
+	name: string;
+	email: string;
+	password: string;
+}
+
+// ------ Register User ------
+export const register = async (
+	req: Request<{}, {}, RegisterRequestBody>,
+	res: Response<AuthResponse>,
+	next: NextFunction
+): Promise<void> => {
 	try {
-		const customer = await Customer.findOne({ email });
-		if (!customer) {
-			return res.status(400).json({ message: "Invalid credentials" });
+		const { name, email, password } = req.body;
+
+		console.log(name, email, password);
+
+		const userExists = await User.findOne({ email });
+		if (userExists) {
+			throw new BadRequestError("User already exists");
 		}
 
-		const isPasswordValid = await bcrypt.compare(
+		const user = await User.create({
+			name,
+			email,
 			password,
-			customer.passwordHash
-		);
-		if (!isPasswordValid) {
-			return res.status(400).json({ message: "Invalid credentials" });
-		}
-
-		const token = jwt.sign({ id: customer._id }, JWT_SECRET, {
-			expiresIn: "1h",
 		});
 
-		res.status(200).json({
-			message: "Login successful",
-			token,
-			user: customer,
+		const userId = user._id.toString();
+
+		const { accessToken, refreshToken } = generateTokens(userId);
+
+		user.refreshToken = refreshToken;
+		await user.save();
+
+		res.status(201).json({
+			success: true,
+			data: {
+				user: {
+					id: userId,
+					name: user.name,
+					email: user.email,
+					role: user.role,
+				},
+				accessToken,
+				refreshToken,
+			},
 		});
 	} catch (error) {
-		res.status(500).json({ message: "Server error", error });
+		next(error);
 	}
 };
 
-export const register = async (req: Request, res: Response) => {
-	const { name, email, password } = req.body;
+interface LoginRequestBody {
+	email: string;
+	password: string;
+	role: string;
+}
 
+// ------ Login User ------
+export const login = async (
+	req: Request<{}, {}, LoginRequestBody>,
+	res: Response<AuthResponse>,
+	next: NextFunction
+): Promise<void> => {
 	try {
-		const existingCustomer = await Customer.findOne({ email });
-		if (existingCustomer) {
-			return res.status(400).json({ message: "User already exists" });
+		const { email, password, role } = req.body;
+
+		if (!email || !password) {
+			throw new BadRequestError("Please provide email and password");
 		}
 
-		const hashedPassword = await bcrypt.hash(password, 10);
+		const user = await User.findOne({ email }).select("+password");
+		if (!user) {
+			throw new UnauthorizedError("Not a registered user");
+		}
+		const userId = user._id.toString();
 
-		const customer = new Customer({
-			fullName: name,
-			email,
-			passwordHash: hashedPassword,
-		});
+		const isMatch = await user.comparePassword(password);
+		if (!isMatch) {
+			throw new UnauthorizedError("Incorrect password");
+		}
 
-		await customer.save();
+		if (role === "admin" && user.role === "user") {
+			throw new UnauthorizedError(
+				"Can't login as admin, please select the user role"
+			);
+		}
 
-		res.status(201).json({
-			message: "User registered successfully",
-			user: customer,
+		const { accessToken, refreshToken } = generateTokens(userId);
+
+		user.refreshToken = refreshToken;
+		await user.save();
+
+		res.status(200).json({
+			success: true,
+			data: {
+				user: {
+					id: userId,
+					name: user.name,
+					email: user.email,
+					role: user.role,
+				},
+				accessToken,
+				refreshToken,
+			},
 		});
 	} catch (error) {
-		res.status(500).json({ message: "Server error", error });
+		next(error);
+	}
+};
+
+interface RefreshTokenRequestBody {
+	refreshToken: string;
+}
+
+// ------ Refresh Token ------
+export const refreshToken = async (
+	req: Request<{}, {}, RefreshTokenRequestBody>,
+	res: Response<AuthResponse>
+): Promise<void> => {
+	const { refreshToken } = req.body;
+
+	if (!refreshToken) {
+		throw new UnauthorizedError("Refresh token is required");
+	}
+
+	try {
+		const decoded = jwt.verify(
+			refreshToken,
+			process.env.JWT_REFRESH_SECRET!
+		) as TokenPayload;
+
+		const user = await User.findById(decoded.userId);
+
+		if (!user || user.refreshToken !== refreshToken) {
+			throw new UnauthorizedError("Invalid refresh token");
+		}
+
+		const userId = user._id.toString();
+
+		const tokens = generateTokens(userId);
+
+		user.refreshToken = tokens.refreshToken;
+		await user.save();
+
+		res.status(200).json({
+			success: true,
+			data: {
+				accessToken: tokens.accessToken,
+				refreshToken: tokens.refreshToken,
+			},
+		});
+	} catch (error) {
+		throw new UnauthorizedError("Invalid refresh token");
+	}
+};
+
+// ------ Logout User ------
+export const logout = async (
+	req: AuthRequest,
+	res: Response<AuthResponse>,
+	next: NextFunction
+): Promise<void> => {
+	try {
+		if (!req.user) {
+			throw new UnauthorizedError("Not authorized");
+		}
+
+		const user = await User.findById(req.user._id);
+		if (user) {
+			user.refreshToken = undefined;
+			await user.save();
+		}
+
+		res.status(200).json({
+			success: true,
+			data: {},
+		});
+	} catch (error) {
+		next(error);
 	}
 };

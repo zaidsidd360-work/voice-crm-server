@@ -1,17 +1,16 @@
-import express from "express";
-import { register } from "../controllers/authController";
-import { login } from "../controllers/authController";
-// import { authenticate } from "../middlewares/authMiddleware";
+import express, { Router } from "express";
+import {
+	register,
+	login,
+	refreshToken,
+	logout,
+} from "../controllers/authController";
 
-const router = express.Router();
+const router: Router = express.Router();
 
-// Public routes
 router.post("/register", register);
 router.post("/login", login);
-
-// Protected routes
-// router.get("/profile", authenticate, (req, res) => {
-//     res.json({ message: "Protected route", user: req.user });
-// });
+router.post("/refresh-token", refreshToken);
+router.post("/logout", logout);
 
 export default router;
