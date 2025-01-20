@@ -28,6 +28,23 @@ app.use(
 // Middleware
 app.use(express.json());
 
+// Root route
+app.get("/", (req, res) => {
+	res.json({
+		status: "success",
+		message: "Voice CRM Tool API",
+		version: "1.0.0",
+	});
+});
+
+// Health check
+app.get("/health", (req, res) => {
+	res.json({
+		status: "healthy",
+		timestamp: new Date().toISOString(),
+	});
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/keys", apiKeyRoutes);
