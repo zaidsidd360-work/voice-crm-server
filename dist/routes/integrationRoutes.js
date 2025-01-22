@@ -4,9 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const integrationController_js_1 = require("../controllers/integrationController.js");
+const integrationController_1 = require("../controllers/integrationController");
 const router = express_1.default.Router();
-router.post("/integration", integrationController_js_1.createIntegration);
-router.put("/integration/:userId", integrationController_js_1.updateIntegration);
-router.get("/integration/:userId", integrationController_js_1.getIntegration);
+// Integration routes
+router.post("/", integrationController_1.createIntegration);
+router.get("/:userId", integrationController_1.getIntegrations);
+router.get("/:id", integrationController_1.getIntegration);
+router.patch("/:id", integrationController_1.updateIntegration);
+router.delete("/:id", integrationController_1.deleteIntegration);
 exports.default = router;

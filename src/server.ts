@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes";
 import botresponseRoutes from "./routes/botresponseRoutes";
 import apiKeyRoutes from "./routes/apiKeyRoutes";
 import vapiRoutes from "./routes/vapiRoutes";
+import integrationRoutes from "./routes/integrationRoutes";
 
 dotenv.config();
 
@@ -57,7 +58,7 @@ app.use(
 
 // app.use(
 // 	cors({
-// 		origin: allowedOrigins,
+// 		origin: "*",
 // 		credentials: true,
 // 	})
 // );
@@ -85,6 +86,7 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/keys", apiKeyRoutes);
 app.use("/api/vapi", vapiRoutes);
+app.use("/api/integrations", integrationRoutes);
 app.use("/api/bot-response", botresponseRoutes);
 
 // Start the server

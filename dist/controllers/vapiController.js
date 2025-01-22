@@ -15,7 +15,6 @@ const getTools = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     const { vapitoken } = req.params;
     const client = new server_sdk_1.VapiClient({ token: vapitoken });
     const data = yield client.tools.list();
-    console.log(data);
     res.json(data);
 });
 exports.getTools = getTools;

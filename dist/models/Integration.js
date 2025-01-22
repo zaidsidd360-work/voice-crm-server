@@ -11,25 +11,55 @@ const IntegrationSchema = new Schema({
         ref: "User",
         required: true,
     },
-    retellApiKey: {
+    name: {
         type: String,
-        required: false,
+        required: true,
+    },
+    type: {
+        type: String,
+        enum: ["airtable", "gohighlevel"],
+        required: true,
     },
     vapiApiKey: {
         type: String,
-        required: false,
+        required: true,
     },
-    airtableApiKey: {
+    vapiToolId: {
         type: String,
-        required: false,
+        required: true,
     },
+    // Airtable specific fields
+    airtableToken: {
+        type: String,
+        required: function () {
+            return this.type === "airtable";
+        },
+    },
+    baseId: {
+        type: String,
+        required: function () {
+            return this.type === "airtable";
+        },
+    },
+    tableId: {
+        type: String,
+        required: function () {
+            return this.type === "airtable";
+        },
+    },
+    // GoHighLevel specific fields
     ghlApiKey: {
         type: String,
-        required: false,
+        required: function () {
+            return this.type === "gohighlevel";
+        },
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
+    status: {
+        type: String,
+        enum: ["active", "inactive"],
+        default: "inactive",
     },
+}, {
+    timestamps: true,
 });
 exports.default = model("Integration", IntegrationSchema);
