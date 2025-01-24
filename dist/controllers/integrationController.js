@@ -17,16 +17,17 @@ const Integration_1 = __importDefault(require("../models/Integration"));
 const errors_1 = require("../utils/errors");
 const createIntegration = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { userId, name, type, vapiApiKey, vapiToolId, airtableToken, baseId, tableId, ghlApiKey, } = req.body;
-        if (!name || !type || !vapiApiKey || !vapiToolId) {
+        const { userId, name, type, vapiToolId, baseId, tableId, ghlApiKey } = req.body;
+        if (!name || !type || !vapiToolId) {
             throw new errors_1.BadRequestError("Missing required fields");
         }
-        console.log(userId);
+        // if(type === "gohighlevel") {
+        //   const ghlApiKey = User.findOne({ _id: userId }).select("apiKeys")[type];
+        // }
         const integration = yield Integration_1.default.create(Object.assign(Object.assign({ userId,
             name,
             type,
-            vapiApiKey,
-            vapiToolId }, (type === "airtable" && { airtableToken, baseId, tableId })), (type === "gohighlevel" && { ghlApiKey })));
+            vapiToolId }, (type === "airtable" && { baseId, tableId })), (type === "gohighlevel" && { ghlApiKey })));
         res.status(201).json({
             success: true,
             data: integration,

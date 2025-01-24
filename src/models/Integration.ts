@@ -20,7 +20,6 @@ const IntegrationSchema = new Schema(
 		},
 		vapiApiKey: {
 			type: String,
-			required: true,
 		},
 		vapiToolId: {
 			type: String,
@@ -55,7 +54,7 @@ const IntegrationSchema = new Schema(
 		status: {
 			type: String,
 			enum: ["active", "inactive"],
-			default: "inactive",
+			default: "active",
 		},
 	},
 	{

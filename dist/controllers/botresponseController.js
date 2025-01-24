@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendDataToAirtable = void 0;
+exports.sendDataToGoHighLevel = exports.sendDataToAirtable = void 0;
 const airtable_1 = __importDefault(require("airtable"));
 const base = new airtable_1.default({
     apiKey: "patu3bTCvjKcj1dAH.14bdd086d57abbd25e028e8225211f1aca60f9ce95e0ce0526a47d19a4522379",
@@ -52,3 +52,40 @@ const sendDataToAirtable = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.sendDataToAirtable = sendDataToAirtable;
+const sendDataToGoHighLevel = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { message } = req.body;
+    if (message.type === "tool-calls") {
+        const vapiFn = message.toolCalls[0].function;
+        console.log(vapiFn.arguments);
+        try {
+            const response = yield fetch("https://services.leadconnectorhq.com/contacts/", {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    Authorization: "Bearer pit-1d95f255-cbe9-47e5-8d29-5b9a529698d0",
+                    "Content-Type": "application/json",
+                    Version: "2021-07-28",
+                },
+                body: JSON.stringify({
+                    name: vapiFn.arguments.name,
+                    email: vapiFn.arguments.email,
+                    locationId: "ndfliIZ7QjE5bL6LUgVY",
+                    phone: vapiFn.arguments.phone,
+                }),
+            });
+            const data = yield response.json();
+            console.log(data);
+            return res.status(200).json({
+                success: true,
+                result: "Your data has been saved successfully.",
+            });
+        }
+        catch (error) {
+            console.log(error);
+            return res
+                .status(500)
+                .json({ result: "Failed to save your data." });
+        }
+    }
+});
+exports.sendDataToGoHighLevel = sendDataToGoHighLevel;

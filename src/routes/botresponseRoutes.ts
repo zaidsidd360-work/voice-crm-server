@@ -1,8 +1,12 @@
 import express from "express";
-import { sendDataToAirtable } from "../controllers/botresponseController";
+import {
+	sendDataToAirtable,
+	sendDataToGoHighLevel,
+} from "../controllers/botresponseController";
 
 const router = express.Router();
 
-router.post("/", sendDataToAirtable);
+router.post("/airtable", sendDataToAirtable);
+router.post("/gohighlevel", sendDataToGoHighLevel);
 
 export default router;

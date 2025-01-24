@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { AuthRequest } from "../types";
 import Integration from "../models/Integration";
 import { BadRequestError, UnauthorizedError } from "../utils/errors";
+import User from "../models/User";
 
 export const createIntegration = async (
 	req: AuthRequest,
@@ -9,31 +10,23 @@ export const createIntegration = async (
 	next: NextFunction
 ) => {
 	try {
-		const {
-			userId,
-			name,
-			type,
-			vapiApiKey,
-			vapiToolId,
-			airtableToken,
-			baseId,
-			tableId,
-			ghlApiKey,
-		} = req.body;
+		const { userId, name, type, vapiToolId, baseId, tableId, ghlApiKey } =
+			req.body;
 
-		if (!name || !type || !vapiApiKey || !vapiToolId) {
+		if (!name || !type || !vapiToolId) {
 			throw new BadRequestError("Missing required fields");
 		}
 
-		console.log(userId);
+		// if(type === "gohighlevel") {
+		//   const ghlApiKey = User.findOne({ _id: userId }).select("apiKeys")[type];
+		// }
 
 		const integration = await Integration.create({
 			userId,
 			name,
 			type,
-			vapiApiKey,
 			vapiToolId,
-			...(type === "airtable" && { airtableToken, baseId, tableId }),
+			...(type === "airtable" && { baseId, tableId }),
 			...(type === "gohighlevel" && { ghlApiKey }),
 		});
 
