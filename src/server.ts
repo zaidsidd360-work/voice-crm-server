@@ -7,6 +7,7 @@ import botresponseRoutes from "./routes/botresponseRoutes";
 import apiKeyRoutes from "./routes/apiKeyRoutes";
 import vapiRoutes from "./routes/vapiRoutes";
 import integrationRoutes from "./routes/integrationRoutes";
+import callSheetRoutes from "./routes/callSheetRoutes";
 
 dotenv.config();
 
@@ -21,47 +22,47 @@ const allowedOrigins = [
 	"https://voice-crm-client.onrender.com",
 ];
 
-app.use((req, res, next) => {
-	const origin = req.headers.origin;
-	if (origin && allowedOrigins.includes(origin)) {
-		res.setHeader("Access-Control-Allow-Origin", origin);
-	}
-	res.setHeader(
-		"Access-Control-Allow-Methods",
-		"GET, POST, PUT, PATCH, DELETE, OPTIONS"
-	);
-	res.setHeader(
-		"Access-Control-Allow-Headers",
-		"Content-Type, Authorization"
-	);
-	res.setHeader("Access-Control-Allow-Credentials", "true");
+// app.use((req, res, next) => {
+// 	const origin = req.headers.origin;
+// 	if (origin && allowedOrigins.includes(origin)) {
+// 		res.setHeader("Access-Control-Allow-Origin", origin);
+// 	}
+// 	res.setHeader(
+// 		"Access-Control-Allow-Methods",
+// 		"GET, POST, PUT, PATCH, DELETE, OPTIONS"
+// 	);
+// 	res.setHeader(
+// 		"Access-Control-Allow-Headers",
+// 		"Content-Type, Authorization"
+// 	);
+// 	res.setHeader("Access-Control-Allow-Credentials", "true");
 
-	if (req.method === "OPTIONS") {
-		return res.sendStatus(200);
-	}
-	next();
-});
-
-app.use(
-	cors({
-		origin: function (origin, callback) {
-			if (!origin || allowedOrigins.includes(origin)) {
-				callback(null, true);
-			} else {
-				callback(new Error("Not allowed by CORS"));
-			}
-		},
-		credentials: true,
-		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-	})
-);
+// 	if (req.method === "OPTIONS") {
+// 		return res.sendStatus(200);
+// 	}
+// 	next();
+// });
 
 // app.use(
 // 	cors({
-// 		origin: "*",
+// 		origin: function (origin, callback) {
+// 			if (!origin || allowedOrigins.includes(origin)) {
+// 				callback(null, true);
+// 			} else {
+// 				callback(new Error("Not allowed by CORS"));
+// 			}
+// 		},
 // 		credentials: true,
+// 		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 // 	})
 // );
+
+app.use(
+	cors({
+		origin: "*",
+		credentials: true,
+	})
+);
 // Middleware
 app.use(express.json());
 
@@ -88,6 +89,7 @@ app.use("/api/keys", apiKeyRoutes);
 app.use("/api/vapi", vapiRoutes);
 app.use("/api/integrations", integrationRoutes);
 app.use("/api/bot-response", botresponseRoutes);
+app.use("/api/call-sheet", callSheetRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

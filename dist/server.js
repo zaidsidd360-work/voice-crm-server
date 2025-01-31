@@ -12,6 +12,7 @@ const botresponseRoutes_1 = __importDefault(require("./routes/botresponseRoutes"
 const apiKeyRoutes_1 = __importDefault(require("./routes/apiKeyRoutes"));
 const vapiRoutes_1 = __importDefault(require("./routes/vapiRoutes"));
 const integrationRoutes_1 = __importDefault(require("./routes/integrationRoutes"));
+const callSheetRoutes_1 = __importDefault(require("./routes/callSheetRoutes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 // Connect to DB
@@ -21,37 +22,42 @@ const allowedOrigins = [
     "https://srv697511.hstgr.cloud",
     "https://voice-crm-client.onrender.com",
 ];
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
-        res.setHeader("Access-Control-Allow-Origin", origin);
-    }
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
-    }
-    next();
-});
-app.use((0, cors_1.default)({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        }
-        else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-}));
+// app.use((req, res, next) => {
+// 	const origin = req.headers.origin;
+// 	if (origin && allowedOrigins.includes(origin)) {
+// 		res.setHeader("Access-Control-Allow-Origin", origin);
+// 	}
+// 	res.setHeader(
+// 		"Access-Control-Allow-Methods",
+// 		"GET, POST, PUT, PATCH, DELETE, OPTIONS"
+// 	);
+// 	res.setHeader(
+// 		"Access-Control-Allow-Headers",
+// 		"Content-Type, Authorization"
+// 	);
+// 	res.setHeader("Access-Control-Allow-Credentials", "true");
+// 	if (req.method === "OPTIONS") {
+// 		return res.sendStatus(200);
+// 	}
+// 	next();
+// });
 // app.use(
 // 	cors({
-// 		origin: "*",
+// 		origin: function (origin, callback) {
+// 			if (!origin || allowedOrigins.includes(origin)) {
+// 				callback(null, true);
+// 			} else {
+// 				callback(new Error("Not allowed by CORS"));
+// 			}
+// 		},
 // 		credentials: true,
+// 		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 // 	})
 // );
+app.use((0, cors_1.default)({
+    origin: "*",
+    credentials: true,
+}));
 // Middleware
 app.use(express_1.default.json());
 // Root route
@@ -75,6 +81,7 @@ app.use("/api/keys", apiKeyRoutes_1.default);
 app.use("/api/vapi", vapiRoutes_1.default);
 app.use("/api/integrations", integrationRoutes_1.default);
 app.use("/api/bot-response", botresponseRoutes_1.default);
+app.use("/api/call-sheet", callSheetRoutes_1.default);
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
