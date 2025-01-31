@@ -6,8 +6,8 @@ const client = new VapiClient({
 });
 
 // Delay helper function
-const delay = (minutes: number) =>
-	new Promise((resolve) => setTimeout(resolve, minutes * 60 * 1000));
+const delay = (seconds: number) =>
+	new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 
 export const callContacts = async (req: Request, res: Response) => {
 	try {
