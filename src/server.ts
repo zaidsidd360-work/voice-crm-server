@@ -8,6 +8,8 @@ import apiKeyRoutes from "./routes/apiKeyRoutes";
 import vapiRoutes from "./routes/vapiRoutes";
 import integrationRoutes from "./routes/integrationRoutes";
 import callSheetRoutes from "./routes/callSheetRoutes";
+import callTriggerRoutes from "./routes/callTriggerRoutes";
+import { Chrono } from "chrono-node";
 
 dotenv.config();
 
@@ -90,6 +92,11 @@ app.use("/api/vapi", vapiRoutes);
 app.use("/api/integrations", integrationRoutes);
 app.use("/api/bot-response", botresponseRoutes);
 app.use("/api/call-sheet", callSheetRoutes);
+app.use("/api/call-trigger", callTriggerRoutes);
+
+const chrono = new Chrono();
+const parsedDate = chrono.parseDate("Coming friday at 2 pm");
+console.log(parsedDate);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
