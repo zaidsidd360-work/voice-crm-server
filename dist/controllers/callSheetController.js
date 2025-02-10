@@ -15,7 +15,7 @@ const client = new server_sdk_1.VapiClient({
     token: "27736a48-a784-4a11-a9e8-13402825c744",
 });
 // Delay helper function
-const delay = (minutes) => new Promise((resolve) => setTimeout(resolve, minutes * 60 * 1000));
+const delay = (seconds) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 const callContacts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { contacts, frequency } = req.body;

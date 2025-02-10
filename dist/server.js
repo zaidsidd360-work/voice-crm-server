@@ -13,6 +13,8 @@ const apiKeyRoutes_1 = __importDefault(require("./routes/apiKeyRoutes"));
 const vapiRoutes_1 = __importDefault(require("./routes/vapiRoutes"));
 const integrationRoutes_1 = __importDefault(require("./routes/integrationRoutes"));
 const callSheetRoutes_1 = __importDefault(require("./routes/callSheetRoutes"));
+const callTriggerRoutes_1 = __importDefault(require("./routes/callTriggerRoutes"));
+const chrono_node_1 = require("chrono-node");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 // Connect to DB
@@ -82,6 +84,10 @@ app.use("/api/vapi", vapiRoutes_1.default);
 app.use("/api/integrations", integrationRoutes_1.default);
 app.use("/api/bot-response", botresponseRoutes_1.default);
 app.use("/api/call-sheet", callSheetRoutes_1.default);
+app.use("/api/call-trigger", callTriggerRoutes_1.default);
+const chrono = new chrono_node_1.Chrono();
+const parsedDate = chrono.parseDate("Coming friday at 2 pm");
+console.log(parsedDate);
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
