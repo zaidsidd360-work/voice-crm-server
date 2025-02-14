@@ -194,12 +194,14 @@ export const checkAvailability = async (req: Request, res: Response) => {
 
 		if (availableDates.length > 0) {
 			// const firstDate = availableDates[0]; // For example: "2024-09-27"
-			const slots = slotsData![yyyymmdd].slots
-				.map((slot: string, i: number) =>
-					i % 2 !== 0 && i !== 0 ? slot : null
-				)
-				.filter((slot: string | null) => slot !== null);
-			console.log("Available slots for ${firstDate}:", slots);
+			const slots =
+				slotsData![yyyymmdd]?.slots ||
+				[]
+					.map((slot: string, i: number) =>
+						i % 2 !== 0 && i !== 0 ? slot : null
+					)
+					.filter((slot: string | null) => slot !== null);
+			console.log("Available slots for ${firstDate}:", slots || []);
 			return res.status(200).send({
 				results: [
 					{
@@ -219,6 +221,55 @@ export const checkAvailability = async (req: Request, res: Response) => {
 					},
 				],
 			});
+		}
+	}
+};
+
+export const saveSummaryToAirtable = async (req: Request, res: Response) => {
+	const { message } = req.body;
+	console.log(message);
+	if (message.type === "end-of-call-report") {
+		const {
+			startedAt,
+			endedAt,
+			summary,
+			cost,
+			durationSeconds: duration,
+			recordingUrl,
+		} = message;
+		try {
+			const response = await fetch(
+				"https://api.airtable.com/v0/appFBqZs4uvwCGzkm/Call%20Summaries",
+				{
+					method: "POST",
+					headers: {
+						Authorization:
+							"Bearer patu3bTCvjKcj1dAH.14bdd086d57abbd25e028e8225211f1aca60f9ce95e0ce0526a47d19a4522379",
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						records: [
+							{
+								fields: {
+									"Started At": startedAt,
+									Summary: summary,
+									Cost: cost.toString(),
+									Duration: duration.toString(),
+									"Recording Url": recordingUrl,
+								},
+							},
+						],
+					}),
+				}
+			);
+			const data = await response.json();
+			console.log(data);
+			return res.status(200).json({ success: true, data });
+		} catch (error) {
+			console.error(error);
+			return res
+				.status(500)
+				.json({ success: false, error: "Failed to save call log" });
 		}
 	}
 };

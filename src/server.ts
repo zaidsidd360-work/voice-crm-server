@@ -22,6 +22,7 @@ const allowedOrigins = [
 	"http://localhost:5173",
 	"https://srv697511.hstgr.cloud",
 	"https://voice-crm-client.onrender.com",
+	"*",
 ];
 
 app.use((req, res, next) => {
