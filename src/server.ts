@@ -20,7 +20,9 @@ connectDB();
 
 const allowedOrigins = [
 	"http://localhost:5173",
+	"http://srv697511.hstgr.cloud",
 	"https://srv697511.hstgr.cloud",
+	"https://srv697511.hstgr.cloud/*",
 	"https://voice-crm-client.onrender.com",
 	"*",
 ];

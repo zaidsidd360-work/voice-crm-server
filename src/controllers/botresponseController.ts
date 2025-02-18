@@ -112,28 +112,24 @@ export const createAppointmentInGHL = async (req: Request, res: Response) => {
 			);
 			const data = await response.json();
 			console.log(data);
-			// if (
-			// 	data.status === "booked" &&
-			// 	data.appointmentStatus === "confirmed"
-			// ) {
-			return res.status(200).send({
-				results: [
-					{
-						toolCallId: toolCallId,
-						result: "Great! Your appointment has been scheduled.",
-					},
-				],
-			});
-			// } else {
-			//   return res.status(400).send({
-			//     results: [
-			//       {
-			//         toolCallId: toolCallId,
-			//         result: "Sorry, we couldn't schedule your appointment. Please try again later.",
-			//       },
-			//     ],
-			//   });
-			// }
+			if (data.status === "booked")
+				return res.status(200).send({
+					results: [
+						{
+							toolCallId: toolCallId,
+							result: "Great! Your appointment has been scheduled.",
+						},
+					],
+				});
+			else
+				return res.status(400).send({
+					results: [
+						{
+							toolCallId: toolCallId,
+							result: `Sorry, we couldn't schedule your appointment. ${data.message}`,
+						},
+					],
+				});
 		} catch (error) {
 			console.log(error);
 			return res.status(400).send({
