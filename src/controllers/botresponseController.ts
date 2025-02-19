@@ -146,15 +146,16 @@ export const createAppointmentInGHL = async (req: Request, res: Response) => {
 
 export const checkAvailability = async (req: Request, res: Response) => {
 	const { message } = req.body;
+  const vapiFn = message.toolCalls[0].function;
 	const toolCallId = message?.toolCalls?.[0]?.id;
+  console.log(vapiFn.arguments.dateTime);
 	if (message.type === "tool-calls") {
-		const vapiFn = message.toolCalls[0].function;
-
-		const chrono = new Chrono();
+    
+    const chrono = new Chrono();
 		const parsedDate = chrono.parseDate(vapiFn.arguments.dateTime);
 		const unixDate = parsedDate?.getTime();
+    console.log(vapiFn.arguments.dateTime, parsedDate, unixDate);
 
-		console.log(vapiFn.arguments.dateTime, parsedDate, unixDate);
 
 		const yyyymmdd = parsedDate?.toISOString().split("T")[0];
 
