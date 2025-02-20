@@ -89,7 +89,7 @@ export const createAppointmentInGHL = async (req: Request, res: Response) => {
 	if (message.type === "tool-calls") {
 		const vapiFn = message.toolCalls[0].function;
 		console.log(vapiFn.arguments);
-		const { locationId, contactId, dateTime } = vapiFn.arguments;
+		const { locationId, contactId, selectedAppTime } = vapiFn.arguments;
 		try {
 			const response = await fetch(
 				"https://services.leadconnectorhq.com/calendars/events/appointments",
@@ -106,7 +106,7 @@ export const createAppointmentInGHL = async (req: Request, res: Response) => {
 						calendarId: "7wKC1lBMjbMjMmH9x0eS",
 						locationId: locationId,
 						contactId: contactId,
-						startTime: dateTime,
+						startTime: selectedAppTime,
 					}),
 				}
 			);
@@ -148,13 +148,13 @@ export const checkAvailability = async (req: Request, res: Response) => {
 	const { message } = req.body;
   const vapiFn = message.toolCalls[0].function;
 	const toolCallId = message?.toolCalls?.[0]?.id;
-  console.log(vapiFn.arguments.dateTime);
+  console.log(vapiFn.arguments.appTime);
 	if (message.type === "tool-calls") {
     
     const chrono = new Chrono();
-		const parsedDate = chrono.parseDate(vapiFn.arguments.dateTime);
+		const parsedDate = chrono.parseDate(vapiFn.arguments.appTime);
 		const unixDate = parsedDate?.getTime();
-    console.log(vapiFn.arguments.dateTime, parsedDate, unixDate);
+    console.log(vapiFn.arguments.appTime, parsedDate, unixDate);
 
 
 		const yyyymmdd = parsedDate?.toISOString().split("T")[0];
@@ -191,7 +191,7 @@ export const checkAvailability = async (req: Request, res: Response) => {
 
 		if (availableDates.length > 0) {
 			// const firstDate = availableDates[0]; // For example: "2024-09-27"
-			const slots =
+			const slots: string[] =
 				slotsData![yyyymmdd]?.slots ||
 				[]
 					.map((slot: string, i: number) =>
@@ -204,7 +204,7 @@ export const checkAvailability = async (req: Request, res: Response) => {
 					{
 						toolCallId: toolCallId,
 						result: `The available slots for the given date are the following:
-                     ${slots}. Recite the available slots to the user and ask them to choose one.`,
+                     ${slots.join(", ")}. Recite the available slots to the user and ask them to choose one.`,
 					},
 				],
 			});
