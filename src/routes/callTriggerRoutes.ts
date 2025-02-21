@@ -1,8 +1,8 @@
 import express, { Router } from "express";
-import { callContact } from "../controllers/callTriggerController";
+import { callContact, callContactRetell } from "../controllers/callTriggerController";
 
 const router: Router = express.Router();
 
-router.post("/", callContact);
+router.post("/", callContactRetell);
 
 export default router;

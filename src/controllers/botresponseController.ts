@@ -84,12 +84,12 @@ export const sendDataToGoHighLevel = async (req: Request, res: Response) => {
 };
 
 export const createAppointmentInGHL = async (req: Request, res: Response) => {
-	const { message } = req.body;
-	const toolCallId = message?.toolCalls?.[0]?.id;
-	if (message.type === "tool-calls") {
-		const vapiFn = message.toolCalls[0].function;
-		console.log(vapiFn.arguments);
-		const { locationId, contactId, selectedAppTime } = vapiFn.arguments;
+	const { args } = req.body;
+	// const toolCallId = message?.toolCalls?.[0]?.id;
+	// if (message.type === "tool-calls") {
+	// 	const vapiFn = message.toolCalls[0].function;
+		// console.log(vapiFn.arguments);
+		const { locationId, contactId, selectedAppTime } = args;
 		try {
 			const response = await fetch(
 				"https://services.leadconnectorhq.com/calendars/events/appointments",
@@ -116,7 +116,7 @@ export const createAppointmentInGHL = async (req: Request, res: Response) => {
 				return res.status(200).send({
 					results: [
 						{
-							toolCallId: toolCallId,
+							// toolCallId: toolCallId,
 							result: "Great! Your appointment has been scheduled.",
 						},
 					],
@@ -125,7 +125,7 @@ export const createAppointmentInGHL = async (req: Request, res: Response) => {
 				return res.status(400).send({
 					results: [
 						{
-							toolCallId: toolCallId,
+							// toolCallId: toolCallId,
 							result: `Sorry, we couldn't schedule your appointment. ${data.message}`,
 						},
 					],
@@ -135,26 +135,26 @@ export const createAppointmentInGHL = async (req: Request, res: Response) => {
 			return res.status(400).send({
 				results: [
 					{
-						toolCallId: toolCallId,
+						// toolCallId: toolCallId,
 						result: "Sorry, we couldn't schedule your appointment.",
 					},
 				],
 			});
 		}
-	}
+	// }
 };
 
 export const checkAvailability = async (req: Request, res: Response) => {
-	const { message } = req.body;
-  const vapiFn = message.toolCalls[0].function;
-	const toolCallId = message?.toolCalls?.[0]?.id;
-  console.log(vapiFn.arguments.appTime);
-	if (message.type === "tool-calls") {
+	const { args } = req.body;
+  // const vapiFn = message.toolCalls[0].function;
+	// const toolCallId = message?.toolCalls?.[0]?.id;
+  console.log(args.appTime);
+	// if (message.type === "tool-calls") {
     
     const chrono = new Chrono();
-		const parsedDate = chrono.parseDate(vapiFn.arguments.appTime);
+		const parsedDate = chrono.parseDate(args.appTime);
 		const unixDate = parsedDate?.getTime();
-    console.log(vapiFn.arguments.appTime, parsedDate, unixDate);
+    console.log(args.appTime, parsedDate, unixDate);
 
 
 		const yyyymmdd = parsedDate?.toISOString().split("T")[0];
@@ -163,7 +163,7 @@ export const checkAvailability = async (req: Request, res: Response) => {
 			return res.status(400).send({
 				results: [
 					{
-						toolCallId: toolCallId,
+						// toolCallId: toolCallId,
 						result: "Sorry, no available slots for the given date.",
 					},
 				],
@@ -202,7 +202,7 @@ export const checkAvailability = async (req: Request, res: Response) => {
 			return res.status(200).send({
 				results: [
 					{
-						toolCallId: toolCallId,
+						// toolCallId: toolCallId,
 						result: `The available slots for the given date are the following:
                      ${slots.join(", ")}. Recite the available slots to the user and ask them to choose one.`,
 					},
@@ -213,13 +213,13 @@ export const checkAvailability = async (req: Request, res: Response) => {
 			return res.status(404).send({
 				results: [
 					{
-						toolCallId: toolCallId,
+						// toolCallId: toolCallId,
 						result: "No slots are available.",
 					},
 				],
 			});
 		}
-	}
+	// }
 };
 
 export const saveSummaryToAirtable = async (req: Request, res: Response) => {
